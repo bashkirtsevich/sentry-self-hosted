@@ -471,6 +471,31 @@ services:
     depends_on:
       - web
       - relay
+      - nginx-proxy
+      - letsencrypt
+  nginx-proxy:
+    image: jwilder/nginx-proxy:alpine
+    <<: [ *restart_policy, *logging ]
+    volumes:
+      - nginx-proxy_vhosts:/etc/nginx/vhost.d
+      - nginx-proxy_html:/usr/share/nginx/html
+      - nginx-proxy_certs:/etc/nginx/certs
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+      - ${PROXY_HTTP_BIND:-80}:80/tcp
+      - ${PROXY_HTTPS_BIND:-443}:443/tcp
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:80/ || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    <<: [ *restart_policy, *logging ]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    volumes_from:
+      - nginx-proxy
   relay:
     <<: [ *restart_policy, *logging ]
     image: "$RELAY_IMAGE"
