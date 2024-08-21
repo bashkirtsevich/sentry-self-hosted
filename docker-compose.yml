@@ -574,3 +574,6 @@ volumes:
   sentry-kafka-log:
   sentry-smtp-log:
   sentry-clickhouse-log:
+  nginx-proxy_vhosts:
+  nginx-proxy_html:
+  nginx-proxy_certs:
